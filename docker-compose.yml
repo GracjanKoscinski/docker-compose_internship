@@ -1,0 +1,34 @@
+networks:
+  tomcat:
+    driver: bridge
+
+services:
+  backend:
+    build:
+      context: .
+      dockerfile: backend.Dockerfile
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/sample"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+    networks:
+      - tomcat
+  
+  frontend:
+    build:
+      context: .
+      dockerfile: frontend.Dockerfile
+    ports:
+      - "80:80"
+    volumes:
+      - ./conf/httpd.conf:/usr/local/apache2/conf/httpd.conf
+      - ./conf/vhosts:/usr/local/apache2/conf/vhosts
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:80/sample"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+    networks:
+      - tomcat
+
